@@ -22,6 +22,7 @@ function Get-SystemFontNames {
     return (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
 }
 
+Remove-Item (Join-Path $ScriptRoot "lib\*.dll") -Stream Zone.Identifier -ErrorAction SilentlyContinue
 
 Add-Type -AssemblyName System.Drawing         # フォント操作用
 Add-Type -AssemblyName PresentationFramework  # WPF 用

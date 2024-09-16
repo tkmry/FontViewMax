@@ -17,5 +17,7 @@ MIT ライセンス
 FontViewMax.exe を実行
 
 # 参考画面
-
 ![screen_shot](https://github.com/user-attachments/assets/4e2731a1-30f8-4ca8-b541-ffaf674ee922)
+
+# etc
+サンプルの一覧表示は Fontviewer というツールを参考にいたしました。

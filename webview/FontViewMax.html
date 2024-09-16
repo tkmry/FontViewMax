@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>Font Checker</title>
+    <style>
+      body { margin: 0; paddig: 0;}
+      
+      #sample_text {
+        font-size: 20px;
+        width: 600px;
+        height: 60px;
+      }
+      
+      #sample_list {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      #sample_list li {
+        list-style: none;
+        margin : 0.7em;
+        padding: 0.7em;
+        line-height: 30px;
+        text-align: center;
+        border: 1px solid #000;
+      }
+      
+      #sample_list li .text {
+        white-space: pre-wrap;
+      }
+      
+      #sample_list li .font-name {
+        padding: 0.5em;
+      }
+    </style>
+    <script src="./jquery-3.7.1.slim.min.js"></script>
+    <script>
+        $(() => {
+            $('#sample_text').keyup((event) => {
+                $('#sample_list .text').text($('#sample_text').val());
+            });
+
+            window.chrome.webview.postMessage({status: 'ready'});
+
+            window.chrome.webview.addEventListener('message', function(event) {
+                console.log(event);
+                let sysfonts = event.data.system_fonts;
+                let userfonts = event.data.user_fonts.map((item) => item[1]);
+                let fonts = userfonts.concat(sysfonts);
+                
+                let user_font_face = $('<style id="user_font_face"></style>');
+                event.data.user_fonts.forEach((fontItem, i) => {
+                    let fontPath = 'file:///' + fontItem[0].replace(/\\/g, '/');
+                    let fontName = fontItem[1];
+                    let font_face_css = `
+                        @font-face {
+                            font-family: "${fontName}";
+                            src: url("${fontPath}");
+                            font-display: swap;
+                        }
+                    `;
+                    user_font_face.append(font_face_css);
+                });
+                $('head').append(user_font_face);
+
+                let sample_box = $('#sample_list');
+                fonts.forEach((fontName, i) => {
+                    let li = $('<li class="sample-item"></li>');
+                    let text_elm = $('<div class="text">012345こんにちは世界(World)</div>').css('font-family', fontName);
+                    let fontname_elm = $(`<div class="font-name">${fontName}</div>`);
+                    li.append(text_elm).append(fontname_elm);
+                    sample_box.append(li);
+                });
+
+            });
+        });
+    </script>
+  </head>
+  <body>
+    <div style="height: 100%;">
+        <div id="header">
+            <h1>Font Viewer Max</h1>
+            <p>利用可能なフォント一覧を出力します。</p>
+            <p>例文の変更:<br /><textarea id="sample_text">012345こんにちは世界(World)</textarea></p>
+        </div>
+        <hr />
+        <ol id="sample_list">
+        </ol>
+    </div>
+  </body>
+</html>

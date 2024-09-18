@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
@@ -45,7 +45,7 @@
             window.chrome.webview.addEventListener('message', function(event) {
                 console.log(event);
                 let sysfonts = event.data.system_fonts;
-                let userfonts = event.data.user_fonts.map((item) => item[1]);
+                let userfonts = event.data.user_fonts.map((item) => item.slice(1));
                 let fonts = userfonts.concat(sysfonts);
                 
                 let user_font_face = $('<style id="user_font_face"></style>');
@@ -64,10 +64,13 @@
                 $('head').append(user_font_face);
 
                 let sample_box = $('#sample_list');
-                fonts.forEach((fontName, i) => {
+                fonts.forEach((fontNames, i) => {
+                    let fontName_normal = fontNames[0];
+                    let fontName_us     = fontNames[1];
+                    let fontName_text   = (!fontName_us || fontName_normal == fontName_us) ? (fontName_normal) : (`${fontName_normal}(${fontName_us})`);
                     let li = $('<li class="sample-item"></li>');
-                    let text_elm = $('<div class="text">012345こんにちは世界(World)</div>').css('font-family', fontName);
-                    let fontname_elm = $(`<div class="font-name">${fontName}</div>`);
+                    let text_elm = $('<div class="text">012345こんにちは世界(World)</div>').css('font-family', fontName_normal);
+                    let fontname_elm = $(`<div class="font-name">${fontName_text}</div>`);
                     li.append(text_elm).append(fontname_elm);
                     sample_box.append(li);
                 });

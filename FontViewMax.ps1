@@ -1,4 +1,8 @@
-﻿$ScriptRoot = if (-not $PSScriptRoot) {
+﻿
+Set-Variable -Option Constant -Name SCRIPT_TITEL   -Value "FontViewMax"
+Set-Variable -Option Constant -Name SCRIPT_VERSION -Value 0.1.0
+
+$ScriptRoot = if (-not $PSScriptRoot) {
     Split-Path -Parent (Convert-Path ([Environment]::GetCommandLineArgs()[0])) 
 } 
 else {
@@ -12,14 +16,23 @@ function Get-UserFontNames {
     $font_path | ForEach-Object {
         $fo = New-Object System.Drawing.Text.PrivateFontCollection
         $fo.AddFontFile($_.FullName)
-        $result += ,@($_.FullName; $fo.Families.Name)
+        $normalName = $fo.Families.Name
+        $usName   = $fo.Families[0].GetName([System.Globalization.CultureInfo]::GetCultureInfo("en-us").LCID)
+        $result += ,@($_.FullName; $normalName; $usName)
     }
     return $result
 }
 
 function Get-SystemFontNames {
     [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
-    return (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
+    return (
+        (New-Object System.Drawing.Text.InstalledFontCollection).Families |
+            ForEach-Object {
+                $normalName = $_.Name
+                $usName     = $_.GetName([System.Globalization.CultureInfo]::GetCultureInfo("en-us").LCID)
+                ,@($normalName; $usName)
+            }
+    )
 }
 
 Remove-Item (Join-Path $ScriptRoot "lib\*.dll") -Stream Zone.Identifier -ErrorAction SilentlyContinue
@@ -63,6 +76,8 @@ $webview.add_WebMessageReceived({
 })
 
 <# Window の表示 #>
+$window.Title = ("{0} v{1}" -f ($SCRIPT_TITEL,$SCRIPT_VERSION))
 [void]$window.ShowDialog()
 $webview.Dispose()
 $window.Close()
+
